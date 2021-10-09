@@ -16,8 +16,9 @@ this file and include it in basic-server.js so that it actually works.
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
+  'access-control-allow-headers': 'content-type, accept, authorization',
+  'access-control-max-age': 10, // Seconds.
+  'Allow': 'GET, POST, PUT, DELETE, OPTIONS'
 };
 
 debugger;
@@ -44,12 +45,13 @@ var requestHandler = function(request, response) {
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
 
-  if (request.url !== '/classes/messages') {
+  if (request.url !== ('/classes/messages' || '/classes/messages?order=-createdAt')) {
     //respond with 404
     response.writeHead(404, headers);
     response.end('Wrong Door');
     return;
   }
+
 
 
   // The outgoing status.
@@ -68,6 +70,10 @@ var requestHandler = function(request, response) {
   //Handle Get Request
   if (request.method === 'GET') {
     response.end(JSON.stringify(Messages.items()));
+    return;
+  }
+  if (request.method === 'OPTIONS') {
+    response.end('allowed');
     return;
   }
 

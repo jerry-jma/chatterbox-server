@@ -73,5 +73,50 @@ describe('server', function() {
     });
   });
 
+  it('Message IDs should start at 9000', function(done) {
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Jono',
+        text: 'Do my bidding!'}
+    };
 
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[0].message_id).to.equal(9000);
+        //expect(messages[0].text).to.equal('Do my bidding!');
+        done();
+      });
+    });
+  });
+
+  it('Empty message gets default message parameters', function(done) {
+    var requestParams2 = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {}
+    };
+
+    request(requestParams2, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[1].username).to.equal('Khai');
+        expect(messages[0].text).to.equal('Drip');
+        expect(messages[0].username).to.equal('Do my bidding!');
+        expect(messages[0].campus).to.equal('hr-sfo');
+
+        // roomname = 'Lobby', text = 'Drip', username = 'Khai', campus = 'hr-sfo'}
+        done();
+      });
+    });
+  });
+
+  it('Message Ids are unique', function(done) {
+    request('http://127.0.0.1:3000/arglebargle', function(error, response, body) {
+      expect(response.statusCode).to.equal(404);
+      done();
+    });
+  });
 });
