@@ -1,3 +1,4 @@
+var Messages = require('./messages').Messages;
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -19,7 +20,7 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-
+debugger;
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -36,12 +37,23 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  // console.log(request.eventNames());
 
-  // The outgoing status.
-  var statusCode = 200;
+  //check the request is at the right endpoint
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
+
+  if (request.url !== '/classes/messages') {
+    //respond with 404
+    response.writeHead(404, headers);
+    response.end('Wrong Door');
+    return;
+  }
+
+
+  // The outgoing status.
+  var statusCode = 200;
 
   // Tell the client we are sending them plain text.
   //
@@ -53,6 +65,25 @@ var requestHandler = function(request, response) {
   // which includes the status and all headers.
   response.writeHead(statusCode, headers);
 
+  //Handle Get Request
+  if (request.method === 'GET') {
+    response.end(JSON.stringify(Messages.items()));
+    return;
+  }
+
+  if (request.method === 'POST') {
+    response.writeHead(201, headers);
+    let message = '';
+    request.on('data', chunk => {
+      message += chunk;
+    });
+    request.on('end', () => {
+      message = JSON.parse(message);
+      Messages.add(message);
+      response.end('Success');
+    });
+    return;
+  }
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
   // response.end() will be the body of the response - i.e. what shows
@@ -74,5 +105,5 @@ var requestHandler = function(request, response) {
 // client from this domain by setting up static file serving.
 
 exports.requestHandler = requestHandler;
-exports.defaultCorsHeaders = defaultCorsHeaders;
+//exports.defaultCorsHeaders = defaultCorsHeaders;
 
