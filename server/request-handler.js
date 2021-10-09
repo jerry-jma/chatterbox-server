@@ -1,4 +1,5 @@
 var Messages = require('./messages').Messages;
+var urlParser = require('url');
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -44,8 +45,9 @@ var requestHandler = function(request, response) {
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
-
-  if (request.url !== ('/classes/messages' || '/classes/messages?order=-createdAt')) {
+  var url = urlParser.parse(request.url).pathname;
+  //console.log(urlParser.parse(request.url));
+  if (url !== ('/classes/messages')) {
     //respond with 404
     response.writeHead(404, headers);
     response.end('Wrong Door');
